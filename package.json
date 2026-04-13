@@ -1,0 +1,230 @@
+{
+  "name": "dbt-forge",
+  "displayName": "dbt Forge",
+  "description": "Zero-dependency dbt development environment for VS Code. Compile, test, and validate dbt models without installing dbt separately.",
+  "version": "0.1.0",
+  "publisher": "motleydigital",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "dbt",
+    "analytics",
+    "sql",
+    "jinja",
+    "data engineering",
+    "analytics engineering",
+    "bigquery",
+    "snowflake",
+    "redshift"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/dbt_project.yml",
+    "workspaceContains:**/dbt_project.yaml"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "dbtForge.compile",
+        "title": "dbt Forge: Compile",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "dbtForge.compileModel",
+        "title": "dbt Forge: Compile Current Model",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "dbtForge.test",
+        "title": "dbt Forge: Test",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "dbtForge.testModel",
+        "title": "dbt Forge: Test Current Model",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "dbtForge.run",
+        "title": "dbt Forge: Run (Compile Only)",
+        "icon": "$(play)"
+      },
+      {
+        "command": "dbtForge.runModel",
+        "title": "dbt Forge: Run Current Model (Compile Only)",
+        "icon": "$(play)"
+      },
+      {
+        "command": "dbtForge.init",
+        "title": "dbt Forge: Initialize Python Environment",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "dbtForge.selectTarget",
+        "title": "dbt Forge: Select Target Profile",
+        "icon": "$(database)"
+      },
+      {
+        "command": "dbtForge.showCompiledSql",
+        "title": "dbt Forge: Show Compiled SQL",
+        "icon": "$(open-preview)"
+      }
+    ],
+    "configuration": {
+      "title": "dbt Forge",
+      "properties": {
+        "dbtForge.pythonPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to a custom Python interpreter. Leave empty to use the bundled environment."
+        },
+        "dbtForge.dbtVersion": {
+          "type": "string",
+          "default": "1.8.*",
+          "description": "dbt-core version to install in the bundled environment."
+        },
+        "dbtForge.adapters": {
+          "type": "array",
+          "default": [
+            "dbt-bigquery",
+            "dbt-snowflake",
+            "dbt-redshift"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "dbt adapter packages to install in the bundled environment."
+        },
+        "dbtForge.defaultTarget": {
+          "type": "string",
+          "default": "",
+          "description": "Default target profile name from profiles.yml."
+        },
+        "dbtForge.compileOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically compile the current model on file save."
+        },
+        "dbtForge.showStatusInExplorer": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show model compilation status icons in the file explorer."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "jinja-sql",
+        "aliases": [
+          "Jinja SQL",
+          "dbt SQL"
+        ],
+        "extensions": [
+          ".sql"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jinja-sql",
+        "scopeName": "source.sql.jinja",
+        "path": "./syntaxes/jinja-sql.tmLanguage.json"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dbt-forge",
+          "title": "dbt Forge",
+          "icon": "resources/icons/dbt-forge.svg"
+        }
+      ]
+    },
+    "views": {
+      "dbt-forge": [
+        {
+          "id": "dbtForge.models",
+          "name": "Models"
+        },
+        {
+          "id": "dbtForge.compiledSql",
+          "name": "Compiled SQL",
+          "type": "webview"
+        }
+      ]
+    },
+    "menus": {
+      "editor/title": [
+        {
+          "command": "dbtForge.compileModel",
+          "when": "resourceExtname == .sql && dbtForge.isActive",
+          "group": "navigation"
+        },
+        {
+          "command": "dbtForge.showCompiledSql",
+          "when": "resourceExtname == .sql && dbtForge.isActive",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "dbtForge.compileModel",
+          "when": "resourceExtname == .sql && dbtForge.isActive",
+          "group": "dbtForge@1"
+        },
+        {
+          "command": "dbtForge.testModel",
+          "when": "resourceExtname == .sql && dbtForge.isActive",
+          "group": "dbtForge@2"
+        },
+        {
+          "command": "dbtForge.runModel",
+          "when": "resourceExtname == .sql && dbtForge.isActive",
+          "group": "dbtForge@3"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "dbtForge.compileModel",
+        "key": "ctrl+shift+c",
+        "mac": "cmd+shift+c",
+        "when": "editorTextFocus && resourceExtname == .sql"
+      },
+      {
+        "command": "dbtForge.test",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t",
+        "when": "dbtForge.isActive"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@vscode/vsce": "^2.22.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

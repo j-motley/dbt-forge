@@ -1,0 +1,185 @@
+{
+  "name": "Jinja SQL (dbt)",
+  "scopeName": "source.sql.jinja",
+  "fileTypes": ["sql"],
+  "patterns": [
+    { "include": "#jinja-comment" },
+    { "include": "#jinja-expression" },
+    { "include": "#jinja-statement" },
+    { "include": "#dbt-macros" },
+    { "include": "#sql" }
+  ],
+  "repository": {
+    "jinja-comment": {
+      "patterns": [
+        {
+          "name": "comment.block.jinja",
+          "begin": "\\{#",
+          "end": "#\\}",
+          "captures": {
+            "0": { "name": "punctuation.definition.comment.jinja" }
+          }
+        }
+      ]
+    },
+    "jinja-expression": {
+      "patterns": [
+        {
+          "name": "meta.expression.jinja",
+          "begin": "\\{\\{",
+          "end": "\\}\\}",
+          "beginCaptures": {
+            "0": { "name": "punctuation.definition.expression.begin.jinja" }
+          },
+          "endCaptures": {
+            "0": { "name": "punctuation.definition.expression.end.jinja" }
+          },
+          "patterns": [
+            { "include": "#jinja-inner" }
+          ]
+        }
+      ]
+    },
+    "jinja-statement": {
+      "patterns": [
+        {
+          "name": "meta.statement.jinja",
+          "begin": "\\{%[-~]?",
+          "end": "[-~]?%\\}",
+          "beginCaptures": {
+            "0": { "name": "punctuation.definition.statement.begin.jinja" }
+          },
+          "endCaptures": {
+            "0": { "name": "punctuation.definition.statement.end.jinja" }
+          },
+          "patterns": [
+            {
+              "name": "keyword.control.jinja",
+              "match": "\\b(if|elif|else|endif|for|endfor|block|endblock|macro|endmacro|call|endcall|filter|endfilter|set|endset|extends|include|import|from|do|with|endwith|raw|endraw|autoescape|endautoescape|materialization|snapshot|endsnapshot|test)\\b"
+            },
+            { "include": "#jinja-inner" }
+          ]
+        }
+      ]
+    },
+    "jinja-inner": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.jinja",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.jinja",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.double.jinja",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.jinja",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "constant.numeric.jinja",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
+        },
+        {
+          "name": "constant.language.jinja",
+          "match": "\\b(true|false|none|True|False|None)\\b"
+        },
+        {
+          "name": "keyword.operator.jinja",
+          "match": "\\b(and|or|not|in|is)\\b|[=!<>]=?|\\+|-|\\*|\\/|%|\\|"
+        },
+        {
+          "name": "support.function.jinja",
+          "match": "\\b(range|lipsum|dict|cycler|joiner|namespace|loop)\\b"
+        },
+        {
+          "name": "support.function.filter.jinja",
+          "match": "\\b(abs|attr|batch|capitalize|center|default|dictsort|escape|filesizeformat|first|float|forceescape|format|groupby|indent|int|join|last|length|list|lower|map|max|min|pprint|random|reject|rejectattr|replace|reverse|round|safe|select|selectattr|slice|sort|string|striptags|sum|title|trim|truncate|unique|upper|urlencode|urlize|wordcount|wordwrap|xmlattr)\\b"
+        }
+      ]
+    },
+    "dbt-macros": {
+      "patterns": [
+        {
+          "name": "support.function.dbt",
+          "match": "\\b(ref|source|config|var|env_var|log|return|exceptions|adapter|api|run_query|statement|target|this|graph|modules|flags|execute|invocation_id|model|schema|database)\\b(?=\\s*\\()"
+        },
+        {
+          "name": "support.function.dbt.materialization",
+          "match": "\\b(ephemeral|view|table|incremental)\\b"
+        }
+      ]
+    },
+    "sql": {
+      "patterns": [
+        {
+          "name": "comment.line.double-dash.sql",
+          "match": "--.*$"
+        },
+        {
+          "name": "comment.block.sql",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "name": "string.quoted.single.sql",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            { "match": "''", "name": "constant.character.escape.sql" }
+          ]
+        },
+        {
+          "name": "constant.numeric.sql",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
+        },
+        {
+          "name": "constant.language.null.sql",
+          "match": "\\b(?i:null)\\b"
+        },
+        {
+          "name": "constant.language.boolean.sql",
+          "match": "\\b(?i:true|false)\\b"
+        },
+        {
+          "name": "keyword.other.dml.sql",
+          "match": "\\b(?i:select|insert|update|delete|merge|upsert)\\b"
+        },
+        {
+          "name": "keyword.other.ddl.sql",
+          "match": "\\b(?i:create|alter|drop|truncate|rename)\\b"
+        },
+        {
+          "name": "keyword.other.clause.sql",
+          "match": "\\b(?i:from|where|join|inner|left|right|outer|cross|full|on|using|group\\s+by|order\\s+by|having|limit|offset|union|intersect|except|all|distinct|as|with|recursive|case|when|then|else|end|between|like|ilike|in|exists|is|not|and|or|asc|desc|nulls\\s+first|nulls\\s+last|over|partition\\s+by|rows|range|preceding|following|unbounded|current\\s+row|qualify|pivot|unpivot|lateral|flatten|window)\\b"
+        },
+        {
+          "name": "keyword.other.sql",
+          "match": "\\b(?i:table|view|schema|database|index|constraint|primary\\s+key|foreign\\s+key|references|unique|check|default|into|values|set|if|replace|temporary|temp|external|materialized)\\b"
+        },
+        {
+          "name": "support.function.aggregate.sql",
+          "match": "\\b(?i:count|sum|avg|min|max|array_agg|string_agg|listagg|group_concat|any_value|approx_count_distinct|median|percentile_cont|percentile_disc)\\b"
+        },
+        {
+          "name": "support.function.scalar.sql",
+          "match": "\\b(?i:coalesce|nullif|ifnull|nvl|nvl2|cast|convert|try_cast|date|timestamp|interval|extract|dateadd|datediff|date_trunc|current_date|current_timestamp|now|getdate|sysdate|year|month|day|hour|minute|second|concat|substring|substr|length|len|trim|ltrim|rtrim|upper|lower|replace|split|regexp_replace|regexp_extract|regexp_like|to_char|to_date|to_number|to_timestamp|parse_json|object_construct|array_construct|greatest|least|abs|ceil|floor|round|power|sqrt|mod|sign|row_number|rank|dense_rank|ntile|lag|lead|first_value|last_value|nth_value)\\b"
+        },
+        {
+          "name": "support.type.sql",
+          "match": "\\b(?i:int|integer|bigint|smallint|tinyint|float|double|decimal|numeric|number|real|boolean|bool|varchar|char|character|string|text|date|time|timestamp|timestamp_ntz|timestamp_ltz|timestamp_tz|datetime|binary|varbinary|variant|object|array|geography|geometry|json|jsonb|uuid|bytea|serial|bigserial)\\b"
+        }
+      ]
+    }
+  }
+}
